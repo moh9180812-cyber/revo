@@ -27,29 +27,29 @@ $("year").textContent = new Date().getFullYear();
 function renderContact() {
   const c = CONFIG.CONTACT;
   const digits = (x) => String(x || "").replace(/[^0-9+]/g, "");
-  // كل كارت: أيقونة + عنوان + قيمة + رابط (لو الرابط فاضي الكارت مش بيتضغط)
-  const items = [
-    { icon: "📞", cls: "c-phone", title: "اتصل بينا", text: c.phone, href: c.phone && `tel:${digits(c.phone)}` },
-    { icon: "💬", cls: "c-wa", title: "واتساب", text: c.whatsapp ? "ابعتلنا رسالة" : "", href: c.whatsapp && `https://wa.me/${digits(c.whatsapp)}`, blank: true },
-    { icon: "✉️", cls: "c-mail", title: "الإيميل", text: c.email, href: c.email && `mailto:${c.email}` },
-    { icon: "📍", cls: "c-addr", title: "العنوان", text: c.address, href: "" },
-    { icon: "🕒", cls: "c-hours", title: "مواعيد العمل", text: c.hours, href: "" },
-  ].filter((i) => i.text);
-  $("contact-cards").innerHTML = items.map((i) => {
-    const tag = i.href ? "a" : "div";
-    const attrs = i.href ? ` href="${esc(i.href)}"${i.blank ? ' target="_blank" rel="noopener"' : ""}` : "";
-    return `<${tag} class="ccard ${i.cls}"${attrs}><span class="cicon">${i.icon}</span><span><b>${i.title}</b><small>${esc(i.text)}</small></span></${tag}>`;
-  }).join("");
-
+  const row = (icon, title, text, href, blank) => {
+    const tag = href ? "a" : "div";
+    const attrs = href ? ` href="${esc(href)}"${blank ? ' target="_blank" rel="noopener"' : ""}` : "";
+    return `<${tag} class="crow"${attrs}><span class="cicon">${icon}</span><span class="ctext"><small>${title}</small><b>${esc(text)}</b></span></${tag}>`;
+  };
+  // العمود الأول: طرق التواصل (واتساب زرار رئيسي + موبايل + إيميل)
+  const reach = [];
+  if (c.whatsapp) reach.push(`<a class="wa-btn" href="https://wa.me/${digits(c.whatsapp)}" target="_blank" rel="noopener">💬 ابعتلنا واتساب</a>`);
+  if (c.phone) reach.push(row("📞", "اتصل بينا", c.phone, `tel:${digits(c.phone)}`));
+  if (c.email) reach.push(row("✉️", "الإيميل", c.email, `mailto:${c.email}`));
+  // العمود التاني: العنوان + المواعيد + السوشيال
+  const info = [];
+  if (c.address) info.push(row("📍", "العنوان", c.address));
+  if (c.hours) info.push(row("🕒", "مواعيد العمل", c.hours));
   const names = { facebook: ["فيسبوك", "f"], instagram: ["إنستجرام", "📷"], tiktok: ["تيك توك", "♪"], youtube: ["يوتيوب", "▶"] };
   const links = Object.entries(CONFIG.SOCIAL).filter(([, url]) => url);
-  $("social-buttons").innerHTML = links.map(([k, url]) =>
-    `<a class="sbtn s-${k}" href="${esc(url)}" target="_blank" rel="noopener"><span>${(names[k] || ["", "🔗"])[1]}</span> ${(names[k] || [k])[0]}</a>`).join("");
-  $("social").innerHTML = links.map(([k, url]) =>
-    `<a class="sdot s-${k}" href="${esc(url)}" target="_blank" rel="noopener" aria-label="${(names[k] || [k])[0]}">${(names[k] || ["", "🔗"])[1]}</a>`).join("");
-
-  // فوتر: قائمة تواصل مختصرة
-  $("contact-list").innerHTML = items.map((i) => `<li>${i.icon} ${i.href ? `<a href="${esc(i.href)}"${i.blank ? ' target="_blank" rel="noopener"' : ""}>${esc(i.text)}</a>` : esc(i.text)}</li>`).join("");
+  if (links.length) {
+    info.push(`<div class="follow"><small>تابعنا</small><div class="social-row">${links.map(([k, url]) =>
+      `<a class="sbtn s-${k}" href="${esc(url)}" target="_blank" rel="noopener" aria-label="${(names[k] || [k])[0]}"><span>${(names[k] || ["", "🔗"])[1]}</span>${(names[k] || [k])[0]}</a>`).join("")}</div></div>`);
+  }
+  const col = (title, parts) => parts.length ? `<div class="ccol"><h3>${title}</h3>${parts.join("")}</div>` : "";
+  $("contact-card").innerHTML = col("كلمنا", reach) + col("لقيّنا", info);
+  $("contact").hidden = !reach.length && !info.length;
 }
 
 // ---- أدوات صغيرة للمنتجات ----
