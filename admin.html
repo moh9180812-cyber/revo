@@ -27,7 +27,7 @@
       <div id="login-err"></div>
     </form>
     <div id="panel" class="hidden">
-      <p class="actions"><button id="xlsx">⬇️ تصدير Excel (.xlsx)</button> <button id="csv">تصدير CSV (اختياري)</button> <span id="count"></span></p>
+      <p class="actions"><button id="xlsx">⬇️ تصدير Excel (.xlsx)</button> <button id="csv">تصدير CSV (اختياري)</button> <span id="count"></span> <span id="msg" style="color:#b00"></span></p>
       <table><thead><tr><th>التاريخ</th><th>الاسم</th><th>الموبايل</th><th>المدينة</th><th>العنوان</th><th>المنتجات</th><th>الإجمالي</th><th>الحالة</th><th>بوليصة</th></tr></thead>
       <tbody id="rows"></tbody></table>
     </div>
@@ -36,8 +36,6 @@
     <div id="label-card" class="label-card"></div>
     <p class="actions"><button id="lbl-print">🖨️ طباعة</button> <button id="lbl-img">🖼️ حفظ كصورة</button> <button id="lbl-close">إغلاق</button></p>
   </div></div>
-  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="config.js"></script>
   <script src="db.js"></script>
   <script src="admin.js"></script>
