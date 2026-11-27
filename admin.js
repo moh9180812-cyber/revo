@@ -215,6 +215,11 @@ async function removeProduct(id) {
   try { await deleteProduct(await tk(), id); await loadProductsTab(); } catch (e) { alert(e.message); }
 }
 let editingId = null;
+function ratingPreview() {
+  const r = Math.min(5, Math.max(0, Number($("p-form").rating.value) || 0)), full = Math.round(r);
+  $("rating-prev").textContent = "★".repeat(full) + "☆".repeat(5 - full);
+}
+$("p-form").elements.rating.oninput = ratingPreview;
 function openProductForm(p) {
   editingId = p ? p.id : null;
   const f = $("p-form");
@@ -225,6 +230,7 @@ function openProductForm(p) {
   f.stock.value = p ? p.stock : 0; f.badge.value = p ? p.badge || "" : "";
   f.description.value = p ? p.description || "" : ""; f.emoji.value = p ? p.emoji || "🛍️" : "🛍️";
   f.image.value = p ? p.image || "" : ""; f.active.checked = p ? p.active : true;
+  f.rating.value = p ? Number(p.rating) || 0 : 0; f.reviews.value = p ? parseInt(p.reviews, 10) || 0 : 0; ratingPreview();
   $("p-prev").src = f.image.value; $("p-prev").style.display = f.image.value ? "" : "none";
   $("cats").innerHTML = [...new Set(products.map((x) => x.category))].map((c) => `<option value="${esc(c)}">`).join("");
   $("pf-msg").textContent = "";
@@ -268,6 +274,7 @@ $("p-form").onsubmit = async (e) => {
       price: Number(f.price.value), old_price: Number(f.old_price.value) || 0, stock: Math.max(0, parseInt(f.stock.value, 10) || 0),
       badge: f.badge.value.trim(), description: f.description.value.trim(), emoji: f.emoji.value.trim() || "🛍️",
       image, active: f.active.checked,
+      rating: Math.min(5, Math.max(0, Number(f.rating.value) || 0)), reviews: Math.max(0, parseInt(f.reviews.value, 10) || 0),
     });
     $("pm").classList.add("hidden");
     await loadProductsTab();
