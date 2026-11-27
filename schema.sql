@@ -21,3 +21,7 @@ create policy "customers can insert" on orders for insert to anon
 -- صاحب المتجر (مسجّل دخول) بس يقدر يقرا ويعدّل
 create policy "owner can read" on orders for select to authenticated using (true);
 create policy "owner can update" on orders for update to authenticated using (true);
+
+-- صلاحيات الجدول (لازم مع الـ policies)
+grant insert on orders to anon;
+grant select, update on orders to authenticated;
