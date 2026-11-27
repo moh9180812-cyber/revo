@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>لوحة الطلبات | ريڤو</title>
+  <title>لوحة التحكم | ريڤو</title>
+  <script>if (window.top === window.self) location.replace("index.html#admin");</script>
   <link rel="stylesheet" href="style.css">
   <style>
     .atabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}.atabs button{background:#fff;color:#7c3aed;border:1px solid #7c3aed}.atabs button.on{background:#7c3aed;color:#fff}
@@ -23,7 +24,7 @@
   </style>
 </head>
 <body>
-  <header><h1 id="admin-title">لوحة الطلبات</h1><span><button class="small hidden" id="logout-admin">تسجيل خروج</button> <a href="index.html" style="color:#fff">المتجر</a></span></header>
+  <header><h1 id="admin-title">لوحة الطلبات</h1><span><button class="small hidden" id="logout-admin">تسجيل خروج</button> <a href="index.html" id="back-shop" style="color:#fff">رجوع للمتجر</a></span></header>
   <div class="wrap">
     <form id="login" class="hidden">
       <label>الإيميل <input name="email" type="email" required></label>
@@ -82,5 +83,10 @@
   <script src="config.js"></script>
   <script src="db.js"></script>
   <script src="admin.js"></script>
+  <script>
+    // جوه التطبيق الرئيسي: الرجوع للمتجر وتسجيل الخروج بيتعاملوا مع الصفحة الأم
+    $("back-shop").onclick = (e) => { e.preventDefault(); parent.closeAdmin && parent.closeAdmin(); };
+    $("logout-admin").onclick = () => { signOut(); parent.location.hash = ""; parent.location.reload(); };
+  </script>
 </body>
 </html>
