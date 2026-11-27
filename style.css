@@ -1,0 +1,28 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Segoe UI", Tahoma, Arial, sans-serif; background: #faf7f5; color: #2b2b2b; }
+header { background: #7c3aed; color: #fff; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 5; }
+header h1 { font-size: 20px; margin: 0; }
+button { cursor: pointer; border: 0; border-radius: 8px; padding: 10px 14px; font-size: 15px; background: #7c3aed; color: #fff; }
+button.light { background: #fff; color: #7c3aed; }
+button.small { padding: 4px 10px; background: #ddd; color: #333; }
+.hero { text-align: center; padding: 28px 16px; background: #ede9fe; }
+.hero h2 { margin: 0 0 6px; }
+.filters { display: flex; gap: 8px; justify-content: center; padding: 12px; flex-wrap: wrap; }
+.filters button { background: #fff; color: #7c3aed; border: 1px solid #7c3aed; }
+.filters button.active { background: #7c3aed; color: #fff; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; padding: 12px; max-width: 960px; margin: auto; }
+.card { background: #fff; border-radius: 12px; padding: 12px; box-shadow: 0 1px 4px #0002; text-align: center; }
+.card .pic { font-size: 56px; background: #f3f0ff; border-radius: 10px; padding: 14px 0; }
+.card h3 { font-size: 16px; margin: 8px 0 2px; }
+.card p { font-size: 13px; color: #666; margin: 0 0 6px; }
+.price { font-weight: bold; margin-bottom: 8px; }
+.hidden { display: none !important; }
+#cart-panel { position: fixed; inset: 0 0 0 auto; width: min(380px, 100%); background: #fff; box-shadow: -2px 0 10px #0004; padding: 16px; overflow-y: auto; z-index: 10; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid #eee; }
+form label { display: block; margin-top: 10px; font-size: 14px; }
+form input, form textarea { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; font-family: inherit; }
+.msg { background: #dcfce7; padding: 12px; border-radius: 8px; margin-top: 12px; }
+.err { background: #fee2e2; padding: 12px; border-radius: 8px; margin-top: 12px; }
+table { width: 100%; border-collapse: collapse; background: #fff; font-size: 14px; }
+th, td { border: 1px solid #ddd; padding: 6px; text-align: right; vertical-align: top; }
+.wrap { max-width: 1000px; margin: auto; padding: 16px; overflow-x: auto; }
