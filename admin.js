@@ -43,10 +43,7 @@ $("csv").onclick = () => {
   const q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
   const lines = orders.map((o) => [o.created_at, o.customer_name, o.phone, o.city, o.address, o.notes, itemsText(o), o.total, o.status].map(q).join(","));
   const blob = new Blob(["\ufeff" + [head.map(q).join(","), ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "orders.csv";
-  a.click();
+  saveBlob(blob, "orders.csv");
 };
 
 $("login").onsubmit = async (e) => {
@@ -59,8 +56,38 @@ $("login").onsubmit = async (e) => {
 if (HAS_DB) $("login").classList.remove("hidden"); else show(); // وضع تجريبي بدون دخول
 
 // ===== تصدير Excel (مكتبة ExcelJS من CDN، كله في المتصفح) =====
+// تحميل المكتبات وقت الاستخدام، ولو CDN مش شغال بنجرب التاني
+const LIBS = {
+  ExcelJS: ["https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js", "https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js", "https://unpkg.com/exceljs@4.4.0/dist/exceljs.min.js"],
+  html2canvas: ["https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js", "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js", "https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"],
+};
+function loadScript(src) {
+  return new Promise((ok, no) => {
+    const s = document.createElement("script");
+    s.src = src; s.onload = ok; s.onerror = () => no(new Error("load " + src));
+    document.head.appendChild(s);
+  });
+}
+async function needLib(name) {
+  if (window[name]) return;
+  for (const src of LIBS[name]) { try { await loadScript(src); if (window[name]) return; } catch (e) {} }
+  throw new Error("مش قادر يحمّل مكتبة " + name + ". اتأكد من النت وجرب تاني، أو استخدم تصدير CSV.");
+}
+function say(t) { $("msg").textContent = t || ""; }
+// تنزيل ملف: بنحط الرابط في الصفحة الأول عشان موبايل كروم يقبله
+function saveBlob(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = name; a.style.display = "none";
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 15000);
+}
+const fmtDate = (d) => { const x = new Date(d), p = (n) => String(n).padStart(2, "0"); return `${x.getFullYear()}-${p(x.getMonth() + 1)}-${p(x.getDate())} ${p(x.getHours())}:${p(x.getMinutes())}`; };
+
 $("xlsx").onclick = async () => {
-  if (!window.ExcelJS) return alert("مكتبة Excel لسه ما اتحملتش، جرب تاني.");
+ say("جاري تجهيز ملف Excel...");
+ try {
+  await needLib("ExcelJS");
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet("الطلبات", { views: [{ rightToLeft: true, state: "frozen", ySplit: 1 }] });
   ws.columns = [
@@ -71,7 +98,7 @@ $("xlsx").onclick = async () => {
     { header: "الحالة", key: "st", width: 12 },
   ];
   orders.forEach((o) => ws.addRow({
-    d: new Date(o.created_at).toLocaleString("ar-EG"), n: o.customer_name, p: String(o.phone ?? ""), c: o.city,
+    d: fmtDate(o.created_at), n: o.customer_name, p: String(o.phone ?? ""), c: o.city,
     a: o.address, t: o.notes || "", i: o.items.map((i) => `${i.name} × ${i.qty}`).join("\n"),
     s: Number(o.total), st: STATUSES[o.status] || o.status,
   }));
@@ -88,10 +115,9 @@ $("xlsx").onclick = async () => {
   total.eachCell({ includeEmpty: true }, (c) => { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3E6EC" } }; });
   ws.getColumn("s").numFmt = "#,##0";
   const buf = await wb.xlsx.writeBuffer();
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
-  a.download = "orders.xlsx";
-  a.click();
+  saveBlob(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), "orders.xlsx");
+  say("");
+ } catch (e) { say(e.message); alert(e.message); }
 };
 
 // ===== بوليصة شحن لكل طلب: طباعة أو حفظ كصورة =====
@@ -114,12 +140,11 @@ function showLabel(id) {
 $("lbl-close").onclick = () => $("label-modal").classList.add("hidden");
 $("lbl-print").onclick = () => window.print();
 $("lbl-img").onclick = async () => {
-  if (!window.html2canvas) return alert("مكتبة الصور لسه ما اتحملتش، جرب تاني.");
-  const canvas = await html2canvas($("label-card"), { scale: 2, backgroundColor: "#fff" });
-  const a = document.createElement("a");
-  a.href = canvas.toDataURL("image/png");
-  a.download = `label-${String(labelOrder.id).slice(0, 8)}.png`;
-  a.click();
+  try {
+    await needLib("html2canvas");
+    const canvas = await html2canvas($("label-card"), { scale: 2, backgroundColor: "#fff" });
+    canvas.toBlob((b) => saveBlob(b, `label-${String(labelOrder.id).slice(0, 8)}.png`), "image/png");
+  } catch (e) { alert(e.message); }
 };
 
 // اسم المتجر في الصفحة
