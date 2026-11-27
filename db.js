@@ -23,7 +23,22 @@ async function saveOrder(order, token) {
     headers: headers(token), // لو الزبون مسجّل دخول الطلب بيتربط بحسابه
     body: JSON.stringify(order),
   });
-  if (!res.ok) throw new Error("save failed: " + (await res.text()));
+  if (!res.ok) throw orderError(await res.text());
+}
+
+// رسائل الأخطاء من السيرفر (المخزون / الكوبون) بالعربي
+function orderError(text) {
+  let msg = "";
+  try { msg = JSON.parse(text).message || ""; } catch (_) { msg = text; }
+  const [kind, ...rest] = msg.split(":");
+  const arg = rest.join(":").trim();
+  const e = new Error("save failed: " + text);
+  e.kind = kind;
+  if (kind === "out_of_stock") e.userMsg = `"${arg}" الكمية المتاحة خلصت أو أقل من المطلوب. عدّل السلة وجرّب تاني.`;
+  else if (kind === "unavailable") e.userMsg = `"${arg}" مش متاح حاليًا. شيله من السلة وكمّل.`;
+  else if (kind === "coupon_invalid") e.userMsg = arg || "الكوبون غير صالح.";
+  else if (kind === "order_invalid") e.userMsg = arg || "الطلب غير صالح.";
+  return e;
 }
 
 // تسجيل دخول صاحب المتجر (Supabase Auth)
@@ -50,9 +65,14 @@ async function isOwner(token) {
 const SESSION_KEY = "lamsa_session";
 
 function getSession() { return JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); }
-function setSession(data) {
+// الجلسة بتفضل شهر (30 يوم) من وقت تسجيل الدخول، وبعدها لازم تدخل تاني.
+// التوكن بيتجدد لوحده في الخلفية (refresh token).
+const SESSION_DAYS = 30;
+function setSession(data, keepLoginTime) {
+  const old = getSession();
   const s = { access_token: data.access_token, refresh_token: data.refresh_token,
-              expires_at: data.expires_at || Math.floor(Date.now() / 1000) + (data.expires_in || 3600), user: data.user };
+              expires_at: data.expires_at || Math.floor(Date.now() / 1000) + (data.expires_in || 3600), user: data.user,
+              login_at: keepLoginTime && old && old.login_at ? old.login_at : Date.now() };
   localStorage.setItem(SESSION_KEY, JSON.stringify(s));
   return s;
 }
@@ -62,12 +82,14 @@ function signOut() { localStorage.removeItem(SESSION_KEY); }
 async function getToken() {
   let s = getSession();
   if (!s) return null;
+  if (!s.login_at) { s.login_at = Date.now(); localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
+  if (Date.now() - s.login_at > SESSION_DAYS * 86400000) { signOut(); return null; } // عدّى الشهر
   if (s.expires_at - 60 < Date.now() / 1000) {
     const res = await fetch(`${CONFIG.SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
       method: "POST", headers: headers(), body: JSON.stringify({ refresh_token: s.refresh_token }),
     });
     if (!res.ok) { signOut(); return null; }
-    s = setSession(await res.json());
+    s = setSession(await res.json(), true);
   }
   return s.access_token;
 }
@@ -142,4 +164,68 @@ async function setStatus(token, id, status) {
     headers: headers(token),
     body: JSON.stringify({ status }),
   });
+}
+
+
+// ================= المنتجات =================
+// قراءة المنتجات المفعّلة للزباين (من غير تسجيل دخول)
+async function loadProducts() {
+  const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/products?select=*&active=eq.true&order=sort.asc,id.asc`, { headers: headers() });
+  if (!res.ok) throw new Error("products");
+  return res.json();
+}
+// للأدمن: كل المنتجات حتى الغير مفعّلة
+async function adminLoadProducts(token) {
+  const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/products?select=*&order=sort.asc,id.asc`, { headers: headers(token) });
+  if (!res.ok) throw new Error("مش قادر أقرأ المنتجات");
+  return res.json();
+}
+// إضافة (من غير id) أو تعديل (بـ id)
+async function saveProduct(token, p) {
+  const isNew = !p.id;
+  const url = `${CONFIG.SUPABASE_URL}/rest/v1/products` + (isNew ? "" : `?id=eq.${p.id}`);
+  const body = { ...p }; delete body.id;
+  const res = await fetch(url, { method: isNew ? "POST" : "PATCH", headers: { ...headers(token), Prefer: "return=representation" }, body: JSON.stringify(body) });
+  if (!res.ok) throw new Error("مقدرناش نحفظ المنتج: " + (await res.text()));
+  return (await res.json())[0];
+}
+async function deleteProduct(token, id) {
+  const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/products?id=eq.${id}`, { method: "DELETE", headers: headers(token) });
+  if (!res.ok) throw new Error("مقدرناش نمسح المنتج");
+}
+// رفع صورة منتج (Supabase Storage). بيرجّع رابط الصورة العام.
+async function uploadProductImage(token, blob) {
+  const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+  const res = await fetch(`${CONFIG.SUPABASE_URL}/storage/v1/object/product-images/${name}`, {
+    method: "POST", headers: { apikey: CONFIG.SUPABASE_ANON_KEY, Authorization: `Bearer ${token}`, "Content-Type": blob.type || "image/jpeg" }, body: blob,
+  });
+  if (!res.ok) throw new Error("مقدرناش نرفع الصورة: " + (await res.text()));
+  return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/product-images/${name}`;
+}
+
+// ================= الكوبونات =================
+// الزبون: الكوبون صالح وبكام خصم؟
+async function checkCoupon(code, subtotal) {
+  const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/rpc/check_coupon`, {
+    method: "POST", headers: headers(), body: JSON.stringify({ p_code: code, p_subtotal: subtotal }),
+  });
+  if (!res.ok) return { ok: false, message: "مقدرناش نتحقق من الكوبون." };
+  return res.json();
+}
+async function adminLoadCoupons(token) {
+  const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/coupons?select=*&order=created_at.desc`, { headers: headers(token) });
+  if (!res.ok) throw new Error("مش قادر أقرأ الكوبونات");
+  return res.json();
+}
+async function addCoupon(token, c) {
+  const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/coupons`, { method: "POST", headers: headers(token), body: JSON.stringify(c) });
+  if (!res.ok) throw new Error((await res.text()).includes("duplicate") ? "الكود ده موجود قبل كده." : "مقدرناش نحفظ الكوبون.");
+}
+async function patchCoupon(token, code, fields) {
+  const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/coupons?code=eq.${encodeURIComponent(code)}`, { method: "PATCH", headers: headers(token), body: JSON.stringify(fields) });
+  if (!res.ok) throw new Error("مقدرناش نعدّل الكوبون");
+}
+async function deleteCoupon(token, code) {
+  const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/coupons?code=eq.${encodeURIComponent(code)}`, { method: "DELETE", headers: headers(token) });
+  if (!res.ok) throw new Error("مقدرناش نمسح الكوبون");
 }
