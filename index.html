@@ -4,45 +4,92 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>متجر لمسة</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="shop.css">
 </head>
 <body>
-  <header>
-    <h1 id="store-name"></h1>
-    <nav>
-      <a href="#products">المنتجات</a>
-      <a href="#about">من نحن</a>
-      <a href="#contact">تواصل معنا</a>
-    </nav>
-    <div class="actions">
-      <button class="light" id="open-account">👤 <span id="account-label">دخول / حساب جديد</span></button>
-      <button class="light" id="open-cart">🛒 السلة (<span id="cart-count">0</span>)</button>
+  <div class="topbar">🚚 توصيل لحد باب البيت &nbsp;•&nbsp; 💵 الدفع عند الاستلام &nbsp;•&nbsp; 🔁 استبدال سهل</div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="logo" href="#top" id="store-name"></a>
+      <form class="search" id="search-form" role="search">
+        <input id="search" type="search" placeholder="ابحث عن ملابس، مكياج، عطور..." autocomplete="off">
+        <button type="submit" aria-label="بحث">🔍</button>
+      </form>
+      <button class="hbtn" id="open-account">👤 <span id="account-label">دخول / حساب جديد</span></button>
+      <button class="hbtn cart-btn" id="open-cart">🛒 <span class="hide-m">السلة</span><span class="badge" id="cart-count">0</span></button>
     </div>
+    <nav class="cats" id="cats" aria-label="الأقسام"></nav>
   </header>
 
-  <section class="hero">
-    <h2>ملابس ومستحضرات تجميل بأسعار حلوة</h2>
-    <p>اطلب دلوقتي والدفع عند الاستلام، والتوصيل لحد باب البيت</p>
-  </section>
+  <main id="top">
+    <section class="banners">
+      <a class="banner b1" href="#deals"><div><small>عروض اليوم</small><h2>خصومات لحد 25%</h2><span class="btn-w">تسوّق العروض</span></div><div class="big">🛍️</div></a>
+      <a class="banner b2" href="#all"><div><small>جديد</small><h2>مكياج وعطور</h2><span class="btn-w">شوف المنتجات</span></div><div class="big">💄</div></a>
+      <a class="banner b3" href="#all"><div><small>ملابس</small><h2>ستايل كل يوم</h2><span class="btn-w">اكتشف</span></div><div class="big">👕</div></a>
+    </section>
 
-  <div class="filters" id="filters"></div>
-  <main class="grid" id="products"></main>
+    <section class="features">
+      <div>🚚<b>توصيل سريع</b><small>لحد باب بيتك</small></div>
+      <div>💵<b>الدفع عند الاستلام</b><small>ادفع لما يوصلك</small></div>
+      <div>✅<b>جودة مضمونة</b><small>منتجات مختارة</small></div>
+      <div>📞<b>دعم سريع</b><small>على الموبايل والواتساب</small></div>
+    </section>
 
-  <section id="about" class="section">
-    <h2>من نحن</h2>
-    <p>"لمسة" متجر صغير بيقدّم ملابس ومستحضرات تجميل مختارة بعناية بأسعار مناسبة. هدفنا إنك تلاقي اللي بتحبه بجودة كويسة وتوصيل سريع لحد بيتك، والدفع عند الاستلام.</p>
-    <p class="muted">✏️ (نص مؤقت: عدّله من ملف index.html)</p>
-  </section>
+    <section id="deals" class="block">
+      <div class="block-head"><h2>🔥 عروض اليوم</h2></div>
+      <div class="hscroll" id="deals-list"></div>
+    </section>
 
-  <section id="contact" class="section">
-    <h2>تواصل معنا</h2>
-    <ul id="contact-list" class="contact-list"></ul>
-  </section>
+    <section id="all" class="block">
+      <div class="block-head">
+        <h2 id="list-title">كل المنتجات</h2>
+        <select id="sort" aria-label="ترتيب">
+          <option value="default">الترتيب: الافتراضي</option>
+          <option value="price-asc">السعر: الأقل أولًا</option>
+          <option value="price-desc">السعر: الأعلى أولًا</option>
+          <option value="rating">الأعلى تقييمًا</option>
+          <option value="discount">أعلى خصم</option>
+        </select>
+      </div>
+      <div class="grid" id="products"></div>
+      <p class="muted center hidden" id="no-results">مفيش منتجات مطابقة للبحث.</p>
+    </section>
+
+    <section id="about" class="block about">
+      <h2>من نحن</h2>
+      <p>"لمسة" متجر صغير بيقدّم ملابس ومستحضرات تجميل مختارة بعناية بأسعار مناسبة. هدفنا إنك تلاقي اللي بتحبه بجودة كويسة وتوصيل سريع لحد بيتك، والدفع عند الاستلام.</p>
+      <p class="muted">✏️ (نص مؤقت: عدّله من ملف index.html)</p>
+    </section>
+
+    <section id="contact" class="block about">
+      <h2>تواصل معنا</h2>
+      <ul id="contact-list" class="contact-list"></ul>
+    </section>
+  </main>
 
   <footer>
     <div id="social" class="social"></div>
     <p>© <span id="year"></span> <span id="footer-name"></span>. كل الحقوق محفوظة.</p>
   </footer>
+
+  <!-- شريط سفلي للموبايل -->
+  <nav class="bottom-nav" aria-label="تنقل سريع">
+    <a href="#top">🏠<span>الرئيسية</span></a>
+    <a href="#all">🗂️<span>المنتجات</span></a>
+    <button id="bn-cart">🛒<span>السلة</span><i class="badge" id="cart-count2">0</i></button>
+    <button id="bn-account">👤<span>حسابي</span></button>
+  </nav>
+
+  <div id="backdrop" class="backdrop hidden"></div>
+
+  <!-- تفاصيل المنتج -->
+  <div id="product-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <button class="close" id="close-product" aria-label="إغلاق">✖</button>
+      <div id="product-detail"></div>
+    </div>
+  </div>
 
   <!-- لوحة الحساب -->
   <aside id="account-panel" class="side hidden">
@@ -83,9 +130,9 @@
 
   <!-- السلة -->
   <aside id="cart-panel" class="side hidden">
-    <div class="row"><h2>سلتك</h2><button class="small" id="close-cart">✖</button></div>
+    <div class="row"><h2>🛒 سلتك</h2><button class="small" id="close-cart">✖</button></div>
     <div id="cart-items"></div>
-    <div class="row"><strong>الإجمالي</strong><strong id="cart-total"></strong></div>
+    <div class="row total-row"><strong>الإجمالي</strong><strong id="cart-total"></strong></div>
     <p class="muted" id="cart-hint"></p>
 
     <form id="order-form">
