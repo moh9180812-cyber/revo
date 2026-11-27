@@ -1,6 +1,7 @@
-// منطق صفحة المتجر: المنتجات، السلة، الحساب، وإرسال الطلب.
+// منطق صفحة المتجر: المنتجات، البحث، السلة، الحساب، وإرسال الطلب.
 let cart = JSON.parse(localStorage.getItem("cart") || "{}"); // { productId: quantity }
 let activeCategory = "الكل";
+let searchText = "";
 let profile = null; // بيانات الزبون المسجّل (لو فيه)
 
 const $ = (id) => document.getElementById(id);
@@ -27,34 +28,115 @@ function renderContact() {
     .map(([k, url]) => `<a href="${esc(url)}" target="_blank" rel="noopener">${names[k] || k}</a>`).join("");
 }
 
-// ---- المنتجات ----
-function renderFilters() {
+// ---- أدوات صغيرة للمنتجات ----
+const CAT_ICONS = { "ملابس": "👕", "مستحضرات تجميل": "💄" };
+const discountPct = (p) => (p.oldPrice > p.price ? Math.round((1 - p.price / p.oldPrice) * 100) : 0);
+function stars(r) {
+  const full = Math.round(r);
+  return "★".repeat(full) + "☆".repeat(5 - full);
+}
+
+// كارت منتج واحد (بيتستخدم في العروض وفي الشبكة)
+function cardHTML(p) {
+  const d = discountPct(p);
+  return `
+    <div class="card">
+      ${d ? `<span class="disc">-${d}%</span>` : ""}
+      ${p.badge ? `<span class="tag">${esc(p.badge)}</span>` : ""}
+      <div class="pic" onclick="openProduct(${p.id})">${p.emoji}<img src="${p.image}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()"></div>
+      <div class="info">
+        <h3 onclick="openProduct(${p.id})">${esc(p.name)}</h3>
+        <div class="rating"><span class="stars">${stars(p.rating)}</span> ${p.rating} (${p.reviews})</div>
+        <div class="prices"><span class="price">${money(p.price)}</span>${d ? `<span class="old">${money(p.oldPrice)}</span>` : ""}</div>
+        <button class="add" onclick="addToCart(${p.id})">أضف للسلة</button>
+      </div>
+    </div>`;
+}
+
+// ---- الأقسام والبحث والترتيب ----
+function renderCats() {
   const cats = ["الكل", ...new Set(PRODUCTS.map((p) => p.category))];
-  $("filters").innerHTML = "";
-  cats.forEach((c) => {
-    const b = document.createElement("button");
-    b.textContent = c;
-    if (c === activeCategory) b.className = "active";
-    b.onclick = () => { activeCategory = c; renderFilters(); renderProducts(); };
-    $("filters").appendChild(b);
+  $("cats").innerHTML = cats.map((c) =>
+    `<button class="cat ${c === activeCategory ? "active" : ""}" data-cat="${esc(c)}">${CAT_ICONS[c] || "🛍️"} ${esc(c)}</button>`).join("");
+  $("cats").querySelectorAll("button").forEach((b) => {
+    b.onclick = () => { activeCategory = b.dataset.cat; renderCats(); renderProducts(); $("all").scrollIntoView(); };
   });
 }
 
+function renderDeals() {
+  const deals = PRODUCTS.filter((p) => discountPct(p) > 0).sort((a, b) => discountPct(b) - discountPct(a));
+  $("deals").classList.toggle("hidden", !deals.length);
+  $("deals-list").innerHTML = deals.map(cardHTML).join("");
+}
+
 function renderProducts() {
-  const list = PRODUCTS.filter((p) => activeCategory === "الكل" || p.category === activeCategory);
-  $("products").innerHTML = list.map((p) => `
-    <div class="card">
-      <div class="pic">${p.emoji}<img src="${p.image}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()"></div>
-      <h3>${p.name}</h3>
-      <p>${p.desc}</p>
-      <div class="price">${money(p.price)}</div>
-      <button onclick="addToCart(${p.id})">أضف للسلة</button>
-    </div>`).join("");
+  let list = PRODUCTS.filter((p) => activeCategory === "الكل" || p.category === activeCategory);
+  const q = searchText.trim().toLowerCase();
+  if (q) list = list.filter((p) => (p.name + " " + p.desc + " " + p.category).toLowerCase().includes(q));
+  const sort = $("sort").value;
+  if (sort === "price-asc") list.sort((a, b) => a.price - b.price);
+  if (sort === "price-desc") list.sort((a, b) => b.price - a.price);
+  if (sort === "rating") list.sort((a, b) => b.rating - a.rating);
+  if (sort === "discount") list.sort((a, b) => discountPct(b) - discountPct(a));
+  $("list-title").textContent = q ? `نتائج البحث عن "${searchText.trim()}"` : activeCategory === "الكل" ? "كل المنتجات" : activeCategory;
+  $("products").innerHTML = list.map(cardHTML).join("");
+  $("no-results").classList.toggle("hidden", list.length > 0);
+}
+
+$("sort").onchange = renderProducts;
+$("search").oninput = (e) => { searchText = e.target.value; renderProducts(); };
+$("search-form").onsubmit = (e) => { e.preventDefault(); renderProducts(); $("all").scrollIntoView(); };
+
+// ---- صفحة تفاصيل المنتج ----
+let detailQty = 1;
+function openProduct(id) {
+  const p = PRODUCTS.find((x) => x.id == id);
+  const d = discountPct(p);
+  detailQty = 1;
+  $("product-detail").innerHTML = `
+    <div class="detail">
+      <div class="pic">${p.emoji}<img src="${p.image}" alt="${esc(p.name)}" onerror="this.remove()"></div>
+      <div>
+        <p class="muted">${esc(p.category)}</p>
+        <h2>${esc(p.name)}</h2>
+        <div class="rating"><span class="stars">${stars(p.rating)}</span> ${p.rating} (${p.reviews} تقييم)</div>
+        <div class="prices" style="margin:12px 0"><span class="price">${money(p.price)}</span>
+          ${d ? `<span class="old">${money(p.oldPrice)}</span><span class="disc" style="position:static">-${d}%</span>` : ""}</div>
+        <p>${esc(p.desc)}</p>
+        <p class="muted">🚚 توصيل لحد باب البيت • 💵 الدفع عند الاستلام</p>
+        <div class="qty">الكمية:
+          <button class="small" onclick="detailChange(-1)">−</button><b id="detail-qty">1</b><button class="small" onclick="detailChange(1)">+</button>
+        </div>
+        <div class="actions">
+          <button onclick="addFromDetail(${p.id}, false)">أضف للسلة</button>
+          <button class="buy" onclick="addFromDetail(${p.id}, true)">اشتري الآن</button>
+        </div>
+      </div>
+    </div>`;
+  $("product-modal").classList.remove("hidden");
+}
+function detailChange(d) { detailQty = Math.max(1, detailQty + d); $("detail-qty").textContent = detailQty; }
+function addFromDetail(id, buyNow) {
+  cart[id] = (cart[id] || 0) + detailQty;
+  saveCart();
+  closeAll();
+  if (buyNow) showPanel("cart");
+  else toast("اتضاف للسلة ✅");
+}
+$("close-product").onclick = closeAll;
+$("product-modal").onclick = (e) => { if (e.target === $("product-modal")) closeAll(); };
+
+// رسالة صغيرة بتظهر وتختفي
+function toast(text) {
+  const t = document.createElement("div");
+  t.className = "toast"; t.textContent = text;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 1800);
 }
 
 // ---- السلة ----
 function saveCart() { localStorage.setItem("cart", JSON.stringify(cart)); renderCart(); }
-function addToCart(id) { cart[id] = (cart[id] || 0) + 1; saveCart(); showPanel("cart"); }
+function addToCart(id) { cart[id] = (cart[id] || 0) + 1; saveCart(); toast("اتضاف للسلة ✅"); }
 function changeQty(id, d) { cart[id] += d; if (cart[id] <= 0) delete cart[id]; saveCart(); }
 
 function cartLines() {
@@ -67,26 +149,39 @@ function cartTotal() { return cartLines().reduce((s, l) => s + l.price * l.qty, 
 
 function renderCart() {
   const lines = cartLines();
-  $("cart-count").textContent = lines.reduce((s, l) => s + l.qty, 0);
-  $("cart-items").innerHTML = lines.length ? lines.map((l) => `
-    <div class="row">
-      <span>${l.name}</span>
+  const count = lines.reduce((s, l) => s + l.qty, 0);
+  $("cart-count").textContent = count;
+  $("cart-count2").textContent = count;
+  $("cart-items").innerHTML = lines.length ? lines.map((l) => {
+    const p = PRODUCTS.find((x) => x.id == l.id);
+    return `
+    <div class="cart-line">
+      <div class="ph">${p.emoji}<img src="${p.image}" alt="" onerror="this.remove()" style="position:absolute;width:56px;height:56px;border-radius:8px;object-fit:cover"></div>
+      <div class="grow">${esc(l.name)}<br><small class="muted">${money(l.price)}</small></div>
       <span><button class="small" onclick="changeQty(${l.id},-1)">−</button> ${l.qty}
       <button class="small" onclick="changeQty(${l.id},1)">+</button></span>
-      <span>${money(l.price * l.qty)}</span>
-    </div>`).join("") : "<p>السلة فاضية</p>";
+      <strong>${money(l.price * l.qty)}</strong>
+    </div>`;
+  }).join("") : "<p class='center muted'>🛒 السلة فاضية</p>";
   $("cart-total").textContent = money(cartTotal());
 }
 
 // ---- فتح وقفل اللوحات الجانبية ----
 function showPanel(name) {
+  $("product-modal").classList.add("hidden");
   $("cart-panel").classList.toggle("hidden", name !== "cart");
   $("account-panel").classList.toggle("hidden", name !== "account");
+  $("backdrop").classList.toggle("hidden", !name);
 }
+function closeAll() { showPanel(null); }
 $("open-cart").onclick = () => showPanel("cart");
-$("close-cart").onclick = () => showPanel(null);
+$("bn-cart").onclick = () => showPanel("cart");
+$("close-cart").onclick = closeAll;
 $("open-account").onclick = () => showPanel("account");
-$("close-account").onclick = () => showPanel(null);
+$("bn-account").onclick = () => showPanel("account");
+$("close-account").onclick = closeAll;
+$("backdrop").onclick = closeAll;
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeAll(); });
 
 // ---- الحساب ----
 function setAccountMsg(text, isError) {
@@ -221,4 +316,4 @@ $("order-form").onsubmit = async (e) => {
   $("submit-btn").disabled = false;
 };
 
-renderContact(); renderFilters(); renderProducts(); renderCart(); refreshAccount();
+renderContact(); renderCats(); renderDeals(); renderProducts(); renderCart(); refreshAccount();
