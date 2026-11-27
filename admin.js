@@ -101,7 +101,7 @@ function showLabel(id) {
   if (!o) return;
   labelOrder = o;
   $("label-card").innerHTML = `
-    <h2>طلب شحن</h2>
+    <h2>${CONFIG.STORE_NAME} | طلب شحن</h2>
     <div class="row big">${esc(o.customer_name)}</div>
     <div class="row">📞 ${esc(o.phone)}</div>
     <div class="row">📍 ${esc(o.city)} - ${esc(o.address)}</div>
@@ -121,3 +121,6 @@ $("lbl-img").onclick = async () => {
   a.download = `label-${String(labelOrder.id).slice(0, 8)}.png`;
   a.click();
 };
+
+// اسم المتجر في الصفحة
+document.getElementById("admin-title").textContent = `لوحة الطلبات | ${CONFIG.STORE_NAME}`;
