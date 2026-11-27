@@ -1,9 +1,9 @@
-// قائمة المنتجات. عدّل أو زوّد منتجات من هنا بس.
+// المنتجات الاحتياطية (seed). المتجر بيقرا المنتجات الحقيقية من Supabase، والقائمة دي بتظهر بس لو الداتابيز مش متاحة.
 // oldPrice: السعر قبل الخصم (0 = مفيش خصم). rating/reviews: التقييم وعدد المراجعات. badge: شارة اختيارية.
 // To add a product, copy one block and change the values.
 // image: رابط الصورة (صور Unsplash مجانية). لو الرابط وقع هيظهر الإيموجي بداله.
 const img = (id) => `https://images.unsplash.com/photo-${id}?w=500&h=500&fit=crop&auto=format`;
-const PRODUCTS = [
+let PRODUCTS = [
   { id: 1, name: "تيشيرت قطن أبيض", category: "ملابس", price: 250, emoji: "👕", image: img("1521572163474-6864f9cf17ab"), desc: "قطن 100% مريح للاستخدام اليومي", oldPrice: 320, rating: 4.6, reviews: 128, badge: "الأكثر مبيعًا" },
   { id: 2, name: "هودي رمادي", category: "ملابس", price: 600, emoji: "🧥", image: img("1556821840-3a63f95609a7"), desc: "هودي شتوي بطبقة داخلية دافئة", oldPrice: 750, rating: 4.8, reviews: 96, badge: "" },
   { id: 3, name: "جينز كلاسيك", category: "ملابس", price: 750, emoji: "👖", image: img("1542272604-787c3835535d"), desc: "قصّة مستقيمة وخامة قوية", oldPrice: 900, rating: 4.5, reviews: 210, badge: "" },
