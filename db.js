@@ -2,6 +2,13 @@
 // All database calls live in this file.
 const HAS_DB = CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY;
 
+// الهيدر المشترك: المفتاح العام + (لو فيه توكن دخول) التوكن بتاع صاحب المتجر
+function headers(token) {
+  const h = { apikey: CONFIG.SUPABASE_ANON_KEY, "Content-Type": "application/json" };
+  if (token) h.Authorization = `Bearer ${token}`;
+  return h;
+}
+
 // حفظ طلب جديد (بيستخدمه الزبون)
 async function saveOrder(order) {
   if (!HAS_DB) {
@@ -13,11 +20,7 @@ async function saveOrder(order) {
   }
   const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/orders`, {
     method: "POST",
-    headers: {
-      apikey: CONFIG.SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${CONFIG.SUPABASE_ANON_KEY}`,
-      "Content-Type": "application/json",
-    },
+    headers: headers(),
     body: JSON.stringify(order),
   });
   if (!res.ok) throw new Error("save failed: " + (await res.text()));
@@ -27,7 +30,7 @@ async function saveOrder(order) {
 async function adminLogin(email, password) {
   const res = await fetch(`${CONFIG.SUPABASE_URL}/auth/v1/token?grant_type=password`, {
     method: "POST",
-    headers: { apikey: CONFIG.SUPABASE_ANON_KEY, "Content-Type": "application/json" },
+    headers: headers(),
     body: JSON.stringify({ email, password }),
   });
   if (!res.ok) throw new Error("بيانات الدخول غلط");
@@ -38,7 +41,7 @@ async function adminLogin(email, password) {
 async function loadOrders(token) {
   if (!HAS_DB) return JSON.parse(localStorage.getItem("demo_orders") || "[]").reverse();
   const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/orders?select=*&order=created_at.desc`, {
-    headers: { apikey: CONFIG.SUPABASE_ANON_KEY, Authorization: `Bearer ${token}` },
+    headers: headers(token),
   });
   if (!res.ok) throw new Error("مش قادر أقرأ الطلبات");
   return res.json();
@@ -49,11 +52,7 @@ async function setStatus(token, id, status) {
   if (!HAS_DB) return;
   await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/orders?id=eq.${id}`, {
     method: "PATCH",
-    headers: {
-      apikey: CONFIG.SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers: headers(token),
     body: JSON.stringify({ status }),
   });
 }
