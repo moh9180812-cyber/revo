@@ -9,7 +9,15 @@
 <body>
   <header>
     <h1 id="store-name"></h1>
-    <button class="light" id="open-cart">🛒 السلة (<span id="cart-count">0</span>)</button>
+    <nav>
+      <a href="#products">المنتجات</a>
+      <a href="#about">من نحن</a>
+      <a href="#contact">تواصل معنا</a>
+    </nav>
+    <div class="actions">
+      <button class="light" id="open-account">👤 <span id="account-label">دخول / حساب جديد</span></button>
+      <button class="light" id="open-cart">🛒 السلة (<span id="cart-count">0</span>)</button>
+    </div>
   </header>
 
   <section class="hero">
@@ -20,10 +28,65 @@
   <div class="filters" id="filters"></div>
   <main class="grid" id="products"></main>
 
-  <aside id="cart-panel" class="hidden">
+  <section id="about" class="section">
+    <h2>من نحن</h2>
+    <p>"لمسة" متجر صغير بيقدّم ملابس ومستحضرات تجميل مختارة بعناية بأسعار مناسبة. هدفنا إنك تلاقي اللي بتحبه بجودة كويسة وتوصيل سريع لحد بيتك، والدفع عند الاستلام.</p>
+    <p class="muted">✏️ (نص مؤقت: عدّله من ملف index.html)</p>
+  </section>
+
+  <section id="contact" class="section">
+    <h2>تواصل معنا</h2>
+    <ul id="contact-list" class="contact-list"></ul>
+  </section>
+
+  <footer>
+    <div id="social" class="social"></div>
+    <p>© <span id="year"></span> <span id="footer-name"></span>. كل الحقوق محفوظة.</p>
+  </footer>
+
+  <!-- لوحة الحساب -->
+  <aside id="account-panel" class="side hidden">
+    <div class="row"><h2>حسابي</h2><button class="small" id="close-account">✖</button></div>
+
+    <div id="auth-box">
+      <div class="tabs">
+        <button type="button" id="tab-login" class="active">تسجيل دخول</button>
+        <button type="button" id="tab-signup">حساب جديد</button>
+      </div>
+      <form id="login-form">
+        <label>الإيميل <input name="email" type="email" required autocomplete="email"></label>
+        <label>الباسورد <input name="password" type="password" required autocomplete="current-password"></label>
+        <p><button type="submit">دخول</button></p>
+      </form>
+      <form id="signup-form" class="hidden">
+        <label>الاسم <input name="name" required autocomplete="name"></label>
+        <label>الإيميل <input name="email" type="email" required autocomplete="email"></label>
+        <label>الباسورد (6 حروف على الأقل) <input name="password" type="password" minlength="6" required autocomplete="new-password"></label>
+        <p><button type="submit">إنشاء حساب</button></p>
+      </form>
+    </div>
+
+    <div id="profile-box" class="hidden">
+      <p class="muted" id="who"></p>
+      <form id="profile-form">
+        <label>الاسم <input name="full_name"></label>
+        <label>رقم الموبايل <input name="phone" type="tel" pattern="[0-9+ ]{8,15}"></label>
+        <label>المحافظة / المدينة <input name="city"></label>
+        <label>العنوان بالتفصيل <textarea name="address" rows="2"></textarea></label>
+        <p><button type="submit">حفظ بياناتي</button> <button type="button" class="small" id="logout">تسجيل خروج</button></p>
+      </form>
+      <h3>طلباتي</h3>
+      <div id="my-orders"></div>
+    </div>
+    <div id="account-msg"></div>
+  </aside>
+
+  <!-- السلة -->
+  <aside id="cart-panel" class="side hidden">
     <div class="row"><h2>سلتك</h2><button class="small" id="close-cart">✖</button></div>
     <div id="cart-items"></div>
     <div class="row"><strong>الإجمالي</strong><strong id="cart-total"></strong></div>
+    <p class="muted" id="cart-hint"></p>
 
     <form id="order-form">
       <label>الاسم <input name="name" required></label>
