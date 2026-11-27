@@ -12,20 +12,36 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 document.title = CONFIG.STORE_NAME;
 $("store-name").textContent = CONFIG.STORE_NAME;
 $("footer-name").textContent = CONFIG.STORE_NAME;
+$("footer-name2").textContent = CONFIG.STORE_NAME;
 $("year").textContent = new Date().getFullYear();
 
-// ---- من نحن / تواصل / سوشيال (من config.js) ----
+// ---- من نحن / تواصل / سوشيال (كله من config.js) ----
 function renderContact() {
   const c = CONFIG.CONTACT;
-  $("contact-list").innerHTML = `
-    <li>📞 <a href="tel:${esc(c.phone)}">${esc(c.phone)}</a></li>
-    <li>💬 <a href="https://wa.me/${esc(c.whatsapp)}" target="_blank" rel="noopener">واتساب</a></li>
-    <li>✉️ <a href="mailto:${esc(c.email)}">${esc(c.email)}</a></li>
-    <li>📍 ${esc(c.address)}</li>
-    <li>🕒 ${esc(c.hours)}</li>`;
-  const names = { facebook: "فيسبوك", instagram: "إنستجرام", tiktok: "تيك توك" };
-  $("social").innerHTML = Object.entries(CONFIG.SOCIAL)
-    .map(([k, url]) => `<a href="${esc(url)}" target="_blank" rel="noopener">${names[k] || k}</a>`).join("");
+  const digits = (x) => String(x || "").replace(/[^0-9+]/g, "");
+  // كل كارت: أيقونة + عنوان + قيمة + رابط (لو الرابط فاضي الكارت مش بيتضغط)
+  const items = [
+    { icon: "📞", cls: "c-phone", title: "اتصل بينا", text: c.phone, href: c.phone && `tel:${digits(c.phone)}` },
+    { icon: "💬", cls: "c-wa", title: "واتساب", text: c.whatsapp ? "ابعتلنا رسالة" : "", href: c.whatsapp && `https://wa.me/${digits(c.whatsapp)}`, blank: true },
+    { icon: "✉️", cls: "c-mail", title: "الإيميل", text: c.email, href: c.email && `mailto:${c.email}` },
+    { icon: "📍", cls: "c-addr", title: "العنوان", text: c.address, href: "" },
+    { icon: "🕒", cls: "c-hours", title: "مواعيد العمل", text: c.hours, href: "" },
+  ].filter((i) => i.text);
+  $("contact-cards").innerHTML = items.map((i) => {
+    const tag = i.href ? "a" : "div";
+    const attrs = i.href ? ` href="${esc(i.href)}"${i.blank ? ' target="_blank" rel="noopener"' : ""}` : "";
+    return `<${tag} class="ccard ${i.cls}"${attrs}><span class="cicon">${i.icon}</span><span><b>${i.title}</b><small>${esc(i.text)}</small></span></${tag}>`;
+  }).join("");
+
+  const names = { facebook: ["فيسبوك", "f"], instagram: ["إنستجرام", "📷"], tiktok: ["تيك توك", "♪"], youtube: ["يوتيوب", "▶"] };
+  const links = Object.entries(CONFIG.SOCIAL).filter(([, url]) => url);
+  $("social-buttons").innerHTML = links.map(([k, url]) =>
+    `<a class="sbtn s-${k}" href="${esc(url)}" target="_blank" rel="noopener"><span>${(names[k] || ["", "🔗"])[1]}</span> ${(names[k] || [k])[0]}</a>`).join("");
+  $("social").innerHTML = links.map(([k, url]) =>
+    `<a class="sdot s-${k}" href="${esc(url)}" target="_blank" rel="noopener" aria-label="${(names[k] || [k])[0]}">${(names[k] || ["", "🔗"])[1]}</a>`).join("");
+
+  // فوتر: قائمة تواصل مختصرة
+  $("contact-list").innerHTML = items.map((i) => `<li>${i.icon} ${i.href ? `<a href="${esc(i.href)}"${i.blank ? ' target="_blank" rel="noopener"' : ""}>${esc(i.text)}</a>` : esc(i.text)}</li>`).join("");
 }
 
 // ---- أدوات صغيرة للمنتجات ----
