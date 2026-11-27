@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>متجر لمسة</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1 id="store-name"></h1>
+    <button class="light" id="open-cart">🛒 السلة (<span id="cart-count">0</span>)</button>
+  </header>
+
+  <section class="hero">
+    <h2>ملابس ومستحضرات تجميل بأسعار حلوة</h2>
+    <p>اطلب دلوقتي والدفع عند الاستلام، والتوصيل لحد باب البيت</p>
+  </section>
+
+  <div class="filters" id="filters"></div>
+  <main class="grid" id="products"></main>
+
+  <aside id="cart-panel" class="hidden">
+    <div class="row"><h2>سلتك</h2><button class="small" id="close-cart">✖</button></div>
+    <div id="cart-items"></div>
+    <div class="row"><strong>الإجمالي</strong><strong id="cart-total"></strong></div>
+
+    <form id="order-form">
+      <label>الاسم <input name="name" required></label>
+      <label>رقم الموبايل <input name="phone" type="tel" required pattern="[0-9+ ]{8,15}"></label>
+      <label>المحافظة / المدينة <input name="city" required></label>
+      <label>العنوان بالتفصيل <textarea name="address" rows="2" required></textarea></label>
+      <label>ملاحظات (اختياري) <textarea name="notes" rows="2"></textarea></label>
+      <p style="margin-top:12px"><button type="submit" id="submit-btn">تأكيد الطلب (الدفع عند الاستلام)</button></p>
+    </form>
+    <div id="result"></div>
+  </aside>
+
+  <script src="config.js"></script>
+  <script src="products.js"></script>
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
