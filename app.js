@@ -71,7 +71,7 @@ function cardHTML(p) {
       <div class="pic" onclick="openProduct(${p.id})">${p.emoji}<img src="${p.image}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()"></div>
       <div class="info">
         <h3 onclick="openProduct(${p.id})">${esc(p.name)}</h3>
-        ${p.reviews > 0 ? `<div class="rating"><span class="stars">${stars(p.rating)}</span> ${p.rating} (${p.reviews})</div>` : ""}
+        ${p.rating > 0 ? `<div class="rating"><span class="stars">${stars(p.rating)}</span> ${p.rating}${p.reviews > 0 ? ` (${p.reviews})` : ""}</div>` : ""}
         <div class="prices"><span class="price">${money(p.price)}</span>${d ? `<span class="old">${money(p.oldPrice)}</span>` : ""}</div>
         ${lowStock(p) ? `<div class="low-stock">باقي ${p.stock} بس</div>` : ""}
         ${out ? `<button class="add" disabled>نفذت الكمية</button>` : `<button class="add" onclick="addToCart(${p.id})">أضف للسلة</button>`}
@@ -125,7 +125,7 @@ function openProduct(id) {
       <div>
         <p class="muted">${esc(p.category)}</p>
         <h2>${esc(p.name)}</h2>
-        ${p.reviews > 0 ? `<div class="rating"><span class="stars">${stars(p.rating)}</span> ${p.rating} (${p.reviews} تقييم)</div>` : ""}
+        ${p.rating > 0 ? `<div class="rating"><span class="stars">${stars(p.rating)}</span> ${p.rating}${p.reviews > 0 ? ` (${p.reviews} تقييم)` : ""}</div>` : ""}
         <div class="prices" style="margin:12px 0"><span class="price">${money(p.price)}</span>
           ${d ? `<span class="old">${money(p.oldPrice)}</span><span class="disc" style="position:static">-${d}%</span>` : ""}</div>
         <p>${esc(p.desc)}</p>
