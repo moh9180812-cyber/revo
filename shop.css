@@ -1,0 +1,155 @@
+/* تصميم المتجر (شكل المتاجر الكبيرة). الألوان في الأول: غيّرها من هنا. */
+:root { --brand: #7c3aed; --brand-dark: #5b21b6; --accent: #ff5a1f; --bg: #f4f4f6; --text: #222; --muted: #777; --star: #f5a623; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 130px; }
+body { margin: 0; font-family: "Segoe UI", Tahoma, Arial, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 64px; }
+a { color: inherit; }
+button { cursor: pointer; border: 0; border-radius: 8px; padding: 10px 14px; font-size: 15px; font-family: inherit; background: var(--brand); color: #fff; }
+button:disabled { opacity: .6; cursor: default; }
+button.small { padding: 4px 10px; background: #e5e5ea; color: #333; }
+.hidden { display: none !important; }
+.center { text-align: center; }
+.muted { color: var(--muted); font-size: 13px; }
+
+/* الشريط العلوي */
+.topbar { background: #1f1235; color: #e9ddff; text-align: center; font-size: 13px; padding: 6px 10px; }
+
+/* الهيدر: لوجو + بحث + حساب + سلة */
+.site-header { background: var(--brand); position: sticky; top: 0; z-index: 20; box-shadow: 0 2px 8px #0003; }
+.header-inner { max-width: 1200px; margin: auto; display: flex; align-items: center; gap: 12px; padding: 10px 14px; }
+.logo { color: #fff; font-size: 24px; font-weight: 800; text-decoration: none; white-space: nowrap; }
+.search { flex: 1; display: flex; background: #fff; border-radius: 10px; overflow: hidden; min-width: 0; }
+.search input { flex: 1; border: 0; padding: 12px 14px; font-size: 15px; font-family: inherit; outline: none; min-width: 0; }
+.search button { border-radius: 0; background: var(--accent); padding: 0 18px; font-size: 18px; }
+.hbtn { background: transparent; color: #fff; display: flex; align-items: center; gap: 6px; padding: 8px 10px; white-space: nowrap; }
+.hbtn:hover { background: #ffffff22; }
+.cart-btn { position: relative; }
+.badge { background: var(--accent); color: #fff; border-radius: 999px; font-size: 12px; min-width: 20px; height: 20px; line-height: 20px; text-align: center; padding: 0 5px; font-style: normal; font-weight: 700; }
+
+/* شريط الأقسام */
+.cats { background: #fff; display: flex; gap: 8px; overflow-x: auto; padding: 8px 14px; justify-content: center; scrollbar-width: none; }
+.cats::-webkit-scrollbar { display: none; }
+.cat { flex: none; display: flex; align-items: center; gap: 6px; background: #f1ecff; color: var(--brand-dark); border-radius: 999px; padding: 7px 16px; font-size: 14px; }
+.cat.active { background: var(--brand); color: #fff; }
+
+main { max-width: 1200px; margin: auto; padding: 12px; }
+
+/* البانرات */
+.banners { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; }
+.banner { border-radius: 14px; color: #fff; text-decoration: none; padding: 20px; display: flex; justify-content: space-between; align-items: center; min-height: 170px; overflow: hidden; }
+.banner h2 { margin: 6px 0 12px; font-size: 24px; }
+.banner small { opacity: .9; font-size: 13px; }
+.banner .big { font-size: 80px; opacity: .9; }
+.banner .btn-w { background: #fff; color: #333; border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 600; }
+.b1 { background: linear-gradient(135deg, #7c3aed, #ec4899); }
+.b2 { background: linear-gradient(135deg, #f97316, #ef4444); }
+.b3 { background: linear-gradient(135deg, #0ea5e9, #6366f1); }
+.b2 h2, .b3 h2 { font-size: 18px; }
+.b2 .big, .b3 .big { font-size: 48px; }
+
+/* مميزات */
+.features { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 12px 0; }
+.features div { background: #fff; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 22px; gap: 2px; }
+.features b { font-size: 14px; }
+.features small { color: var(--muted); font-size: 12px; }
+
+/* الأقسام */
+.block { background: #fff; border-radius: 14px; padding: 14px; margin-top: 12px; }
+.block-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.block-head h2 { margin: 0; font-size: 20px; }
+#deals .block-head h2 { color: var(--accent); }
+select { padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 14px; background: #fff; }
+.hscroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x proximity; }
+.hscroll .card { flex: none; width: 190px; scroll-snap-align: start; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+
+/* كارت المنتج */
+.card { background: #fff; border: 1px solid #eee; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; position: relative; transition: box-shadow .15s, transform .15s; }
+.card:hover { box-shadow: 0 6px 18px #0002; transform: translateY(-2px); }
+.card .pic { position: relative; aspect-ratio: 1 / 1; background: #f3f0ff; display: flex; align-items: center; justify-content: center; font-size: 64px; cursor: pointer; overflow: hidden; }
+.card .pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.card .info { padding: 10px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.card h3 { font-size: 15px; margin: 0; cursor: pointer; line-height: 1.4; }
+.disc { position: absolute; top: 8px; right: 8px; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; z-index: 1; }
+.tag { position: absolute; top: 8px; left: 8px; background: #111c; color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 6px; z-index: 1; }
+.rating { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+.stars { color: var(--star); letter-spacing: 1px; }
+.prices { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-top: auto; }
+.price { font-size: 18px; font-weight: 800; color: var(--accent); }
+.old { color: #999; text-decoration: line-through; font-size: 13px; }
+.add { width: 100%; background: var(--brand); padding: 9px; margin-top: 6px; }
+.add:hover { background: var(--brand-dark); }
+
+/* من نحن / تواصل / فوتر */
+.about { text-align: center; line-height: 1.9; }
+.contact-list { list-style: none; padding: 0; line-height: 2.2; margin: 0; }
+.contact-list a, .social a { color: var(--brand); }
+footer { background: #1f1235; color: #ddd; text-align: center; padding: 22px 16px; margin-top: 16px; font-size: 14px; }
+.social { display: flex; gap: 16px; justify-content: center; margin-bottom: 10px; }
+.social a { color: #c4b5fd; }
+
+/* الشريط السفلي (موبايل) */
+.bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #fff; box-shadow: 0 -2px 10px #0002; z-index: 25; justify-content: space-around; padding: 4px 0; }
+.bottom-nav a, .bottom-nav button { background: none; color: #444; text-decoration: none; display: flex; flex-direction: column; align-items: center; font-size: 20px; padding: 4px 10px; position: relative; border-radius: 0; }
+.bottom-nav span { font-size: 11px; }
+.bottom-nav .badge { position: absolute; top: 0; right: 4px; }
+
+/* اللوحات الجانبية (السلة والحساب) + المودال */
+.backdrop { position: fixed; inset: 0; background: #0007; z-index: 30; }
+.side { position: fixed; inset: 0 auto 0 0; width: min(420px, 100%); background: #fff; box-shadow: 2px 0 14px #0005; padding: 16px; overflow-y: auto; z-index: 40; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 8px 0; border-bottom: 1px solid #eee; }
+.cart-line { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
+.cart-line img, .cart-line .ph { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; background: #f3f0ff; display: flex; align-items: center; justify-content: center; font-size: 26px; flex: none; }
+.cart-line .grow { flex: 1; font-size: 14px; }
+form label { display: block; margin-top: 10px; font-size: 14px; }
+form input, form textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; font-family: inherit; }
+.tabs { display: flex; gap: 8px; margin-bottom: 6px; }
+.tabs button { flex: 1; background: #fff; color: var(--brand); border: 1px solid var(--brand); }
+.tabs button.active { background: var(--brand); color: #fff; }
+.msg { background: #dcfce7; padding: 12px; border-radius: 8px; margin-top: 12px; }
+.err { background: #fee2e2; padding: 12px; border-radius: 8px; margin-top: 12px; }
+.order-card { border: 1px solid #eee; border-radius: 8px; padding: 8px; margin-bottom: 8px; }
+.total-row { font-size: 18px; }
+#submit-btn { width: 100%; background: var(--accent); padding: 13px; font-size: 16px; font-weight: 700; }
+
+.modal { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 12px; background: #0008; }
+.modal-box { background: #fff; border-radius: 16px; max-width: 820px; width: 100%; max-height: 92vh; overflow-y: auto; position: relative; padding: 16px; }
+.modal .close { position: absolute; top: 10px; left: 10px; background: #eee; color: #333; z-index: 2; border-radius: 50%; width: 36px; height: 36px; padding: 0; }
+.detail { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.detail .pic { position: relative; aspect-ratio: 1 / 1; border-radius: 12px; overflow: hidden; background: #f3f0ff; display: flex; align-items: center; justify-content: center; font-size: 90px; }
+.detail .pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.detail h2 { margin: 0 0 6px; }
+.detail .price { font-size: 26px; }
+.detail .qty { display: flex; align-items: center; gap: 10px; margin: 14px 0; }
+.detail .qty b { min-width: 24px; text-align: center; }
+.detail .actions { display: flex; gap: 8px; }
+.detail .actions button { flex: 1; padding: 13px; font-weight: 700; }
+.detail .buy { background: var(--accent); }
+
+/* موبايل */
+@media (max-width: 760px) {
+  html { scroll-padding-top: 150px; }
+  .header-inner { flex-wrap: wrap; gap: 8px; padding: 8px 10px; }
+  .logo { font-size: 20px; flex: 1; }
+  .search { order: 5; flex: 0 0 100%; }
+  .hide-m, #account-label { display: none; }
+  .cart-btn { display: none; }
+  .banners { grid-template-columns: 1fr; }
+  .banner { min-height: 110px; padding: 14px; }
+  .b1 { min-height: 130px; }
+  .features { grid-template-columns: repeat(2, 1fr); }
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .hscroll .card { width: 150px; }
+  .card h3 { font-size: 13px; }
+  .price { font-size: 16px; }
+  .block { padding: 10px; }
+  .bottom-nav { display: flex; }
+  .cats { justify-content: flex-start; }
+  .detail { grid-template-columns: 1fr; }
+  .modal { align-items: flex-end; padding: 0; }
+  .modal-box { border-radius: 16px 16px 0 0; }
+  .side { width: 100%; }
+}
+
+.cart-line .ph { position: relative; }
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 18px; border-radius: 999px; z-index: 99; font-size: 14px; }
