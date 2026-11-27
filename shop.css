@@ -223,3 +223,10 @@ a.crow:hover b { color: var(--brand); }
 #install-bar .ib-text small { color: #777; font-size: 12px; }
 #install-bar #ib-go { padding: 8px 16px; }
 #install-bar #ib-x { background: transparent; color: #999; padding: 6px 8px; }
+
+/* لوحة التحكم جوه التطبيق (لصاحب المتجر بس) */
+#admin-overlay { position: fixed; inset: 0; z-index: 70; background: #faf7f2; }
+#admin-overlay.hidden { display: none; }
+#admin-frame { width: 100%; height: 100%; border: 0; display: block; }
+body.admin-open { overflow: hidden; }
+#install-bar { z-index: 60; }
