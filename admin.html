@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>لوحة الطلبات</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><h1>لوحة الطلبات</h1><a href="index.html" style="color:#fff">المتجر</a></header>
+  <div class="wrap">
+    <form id="login" class="hidden">
+      <label>الإيميل <input name="email" type="email" required></label>
+      <label>الباسورد <input name="password" type="password" required></label>
+      <p><button>دخول</button></p>
+      <div id="login-err"></div>
+    </form>
+    <div id="panel" class="hidden">
+      <p><button id="csv">⬇️ تصدير CSV لشركة الشحن</button> <span id="count"></span></p>
+      <table><thead><tr><th>التاريخ</th><th>الاسم</th><th>الموبايل</th><th>المدينة</th><th>العنوان</th><th>المنتجات</th><th>الإجمالي</th><th>الحالة</th></tr></thead>
+      <tbody id="rows"></tbody></table>
+    </div>
+  </div>
+  <script src="config.js"></script>
+  <script src="db.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
