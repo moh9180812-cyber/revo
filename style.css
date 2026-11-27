@@ -17,7 +17,7 @@ button.small { padding: 4px 10px; background: #ddd; color: #333; }
 .card p { font-size: 13px; color: #666; margin: 0 0 6px; }
 .price { font-weight: bold; margin-bottom: 8px; }
 .hidden { display: none !important; }
-#cart-panel { position: fixed; inset: 0 0 0 auto; width: min(380px, 100%); background: #fff; box-shadow: -2px 0 10px #0004; padding: 16px; overflow-y: auto; z-index: 10; }
+
 .row { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid #eee; }
 form label { display: block; margin-top: 10px; font-size: 14px; }
 form input, form textarea { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; font-family: inherit; }
@@ -26,3 +26,23 @@ form input, form textarea { width: 100%; padding: 9px; border: 1px solid #ccc; b
 table { width: 100%; border-collapse: collapse; background: #fff; font-size: 14px; }
 th, td { border: 1px solid #ddd; padding: 6px; text-align: right; vertical-align: top; }
 .wrap { max-width: 1000px; margin: auto; padding: 16px; overflow-x: auto; }
+
+/* ===== إضافات: الحساب، من نحن، تواصل، صور المنتجات ===== */
+header nav { display: flex; gap: 14px; }
+header nav a { color: #fff; text-decoration: none; font-size: 15px; }
+header .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+@media (max-width: 640px) { header { flex-wrap: wrap; gap: 8px; } header nav { order: 3; width: 100%; justify-content: center; } }
+.card .pic { position: relative; aspect-ratio: 1 / 1; padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.card .pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.side { position: fixed; inset: 0 0 0 auto; width: min(380px, 100%); background: #fff; box-shadow: -2px 0 10px #0004; padding: 16px; overflow-y: auto; z-index: 10; }
+.tabs { display: flex; gap: 8px; margin-bottom: 6px; }
+.tabs button { flex: 1; background: #fff; color: #7c3aed; border: 1px solid #7c3aed; }
+.tabs button.active { background: #7c3aed; color: #fff; }
+.muted { color: #777; font-size: 13px; }
+.order-card { border: 1px solid #eee; border-radius: 8px; padding: 8px; margin-bottom: 8px; }
+.section { max-width: 760px; margin: 28px auto; padding: 0 16px; text-align: center; line-height: 1.8; }
+.contact-list { list-style: none; padding: 0; line-height: 2.2; }
+.contact-list a, .social a { color: #7c3aed; }
+footer { background: #2b2b2b; color: #ddd; text-align: center; padding: 20px 16px; margin-top: 30px; font-size: 14px; }
+.social { display: flex; gap: 16px; justify-content: center; margin-bottom: 10px; }
+.social a { color: #c4b5fd; }
