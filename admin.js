@@ -25,6 +25,11 @@ function esc(s) { return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&am
 async function changeStatus(id, status) { await setStatus(token, id, status); }
 
 async function show() {
+  // الصفحة دي لصاحب المتجر بس (السيرفر بيتأكد، والداتا نفسها محمية بصلاحيات Supabase)
+  if (HAS_DB && !(await isOwner(token))) {
+    $("login-err").innerHTML = '<div class="err">الحساب ده مش صاحب المتجر.</div>';
+    token = null; return;
+  }
   try { orders = await loadOrders(token); } catch (e) { alert(e.message); return; }
   $("login").classList.add("hidden");
   $("panel").classList.remove("hidden");
