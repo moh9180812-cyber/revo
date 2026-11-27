@@ -188,3 +188,18 @@ a.ccard:hover { box-shadow: 0 6px 18px #0002; transform: translateY(-2px); borde
   .contact-cards { grid-template-columns: 1fr; }
   .site-footer { padding-bottom: 80px; }
 }
+
+/* ===== مخزون / كوبون / تتبع الطلب ===== */
+.card.soldout .pic img { filter: grayscale(1); opacity: .45; }
+.card.soldout h3, .card.soldout .prices { opacity: .6; }
+.card .add:disabled, .add:disabled { background: #cbd5e1; color: #475569; cursor: not-allowed; }
+.low-stock { color: #c2410c; font-size: 12px; font-weight: 700; }
+.soldout-msg { color: #b91c1c; font-weight: 700; }
+.coupon-row { display: flex; gap: 8px; margin: 10px 0 4px; }
+.coupon-row input { flex: 1; padding: 9px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; font-family: inherit; text-transform: uppercase; }
+#discount-row:has(#discount-val:empty) { display: none; }
+.track { display: flex; gap: 4px; margin-top: 6px; }
+.track .step { flex: 1; text-align: center; font-size: 12px; padding: 4px 2px; border-radius: 6px; background: #eee; color: #888; }
+.track .step.on { background: #ddd6fe; color: #5b21b6; }
+.track .step.now { background: #7c3aed; color: #fff; font-weight: 700; }
+.track .st-canceled { background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; }
