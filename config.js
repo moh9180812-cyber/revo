@@ -3,7 +3,7 @@
 const CONFIG = {
   SUPABASE_URL: "https://ancavpuephqjqbcvzoly.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_27IJ4U5VB9v9ofWy79BQLQ_RdL8nVqN",
-  STORE_NAME: "متجر لمسة",
+  STORE_NAME: "ريڤو",
   CURRENCY: "ج.م",
 
   // ✏️✏️ بيانات التواصل: غيّر القيم اللي بين العلامتين " " بس، وسيب باقي الكود زي ما هو.
