@@ -9,6 +9,14 @@ const money = (n) => `${n} ${CONFIG.CURRENCY}`;
 // نمنع أي HTML جاي من بيانات المستخدم
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+// حالة المخزون: stock فاضي = من غير حد (المنتجات الاحتياطية)
+const inStock = (p) => p.stock == null || p.stock > 0;
+const lowStock = (p) => p.stock != null && p.stock > 0 && p.stock <= 5;
+const maxQty = (p) => (p.stock == null ? 99 : Math.min(99, p.stock));
+// المنتج من الداتابيز -> الشكل اللي الصفحة بتستخدمه
+const mapProduct = (r) => ({ id: r.id, name: r.name, category: r.category, price: Number(r.price), emoji: r.emoji || "🛍️", image: r.image || "",
+  desc: r.description || "", oldPrice: Number(r.old_price) || 0, rating: Number(r.rating) || 0, reviews: r.reviews || 0, badge: r.badge || "", stock: r.stock });
+
 document.title = CONFIG.STORE_NAME;
 $("store-name").textContent = CONFIG.STORE_NAME;
 $("footer-name").textContent = CONFIG.STORE_NAME;
@@ -55,16 +63,18 @@ function stars(r) {
 // كارت منتج واحد (بيتستخدم في العروض وفي الشبكة)
 function cardHTML(p) {
   const d = discountPct(p);
+  const out = !inStock(p);
   return `
-    <div class="card">
+    <div class="card${out ? " soldout" : ""}">
       ${d ? `<span class="disc">-${d}%</span>` : ""}
       ${p.badge ? `<span class="tag">${esc(p.badge)}</span>` : ""}
       <div class="pic" onclick="openProduct(${p.id})">${p.emoji}<img src="${p.image}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()"></div>
       <div class="info">
         <h3 onclick="openProduct(${p.id})">${esc(p.name)}</h3>
-        <div class="rating"><span class="stars">${stars(p.rating)}</span> ${p.rating} (${p.reviews})</div>
+        ${p.reviews > 0 ? `<div class="rating"><span class="stars">${stars(p.rating)}</span> ${p.rating} (${p.reviews})</div>` : ""}
         <div class="prices"><span class="price">${money(p.price)}</span>${d ? `<span class="old">${money(p.oldPrice)}</span>` : ""}</div>
-        <button class="add" onclick="addToCart(${p.id})">أضف للسلة</button>
+        ${lowStock(p) ? `<div class="low-stock">باقي ${p.stock} بس</div>` : ""}
+        ${out ? `<button class="add" disabled>نفذت الكمية</button>` : `<button class="add" onclick="addToCart(${p.id})">أضف للسلة</button>`}
       </div>
     </div>`;
 }
@@ -108,32 +118,35 @@ let detailQty = 1;
 function openProduct(id) {
   const p = PRODUCTS.find((x) => x.id == id);
   const d = discountPct(p);
-  detailQty = 1;
+  detailQty = 1; detailId = id;
   $("product-detail").innerHTML = `
     <div class="detail">
       <div class="pic">${p.emoji}<img src="${p.image}" alt="${esc(p.name)}" onerror="this.remove()"></div>
       <div>
         <p class="muted">${esc(p.category)}</p>
         <h2>${esc(p.name)}</h2>
-        <div class="rating"><span class="stars">${stars(p.rating)}</span> ${p.rating} (${p.reviews} تقييم)</div>
+        ${p.reviews > 0 ? `<div class="rating"><span class="stars">${stars(p.rating)}</span> ${p.rating} (${p.reviews} تقييم)</div>` : ""}
         <div class="prices" style="margin:12px 0"><span class="price">${money(p.price)}</span>
           ${d ? `<span class="old">${money(p.oldPrice)}</span><span class="disc" style="position:static">-${d}%</span>` : ""}</div>
         <p>${esc(p.desc)}</p>
         <p class="muted">🚚 توصيل لحد باب البيت • 💵 الدفع عند الاستلام</p>
-        <div class="qty">الكمية:
+        ${lowStock(p) ? `<div class="low-stock">باقي ${p.stock} بس</div>` : ""}
+        ${inStock(p) ? `<div class="qty">الكمية:
           <button class="small" onclick="detailChange(-1)">−</button><b id="detail-qty">1</b><button class="small" onclick="detailChange(1)">+</button>
         </div>
         <div class="actions">
           <button onclick="addFromDetail(${p.id}, false)">أضف للسلة</button>
           <button class="buy" onclick="addFromDetail(${p.id}, true)">اشتري الآن</button>
-        </div>
+        </div>` : `<p class="soldout-msg">نفذت الكمية حاليًا</p>`}
       </div>
     </div>`;
   $("product-modal").classList.remove("hidden");
 }
-function detailChange(d) { detailQty = Math.max(1, detailQty + d); $("detail-qty").textContent = detailQty; }
+let detailId = null;
+function detailChange(d) { const p = PRODUCTS.find((x) => x.id == detailId); detailQty = Math.min(maxQty(p), Math.max(1, detailQty + d)); $("detail-qty").textContent = detailQty; }
 function addFromDetail(id, buyNow) {
-  cart[id] = (cart[id] || 0) + detailQty;
+  const p = PRODUCTS.find((x) => x.id == id);
+  cart[id] = Math.min(maxQty(p), (cart[id] || 0) + detailQty);
   saveCart();
   closeAll();
   if (buyNow) showPanel("cart");
@@ -151,17 +164,48 @@ function toast(text) {
 }
 
 // ---- السلة ----
-function saveCart() { localStorage.setItem("cart", JSON.stringify(cart)); renderCart(); }
-function addToCart(id) { cart[id] = (cart[id] || 0) + 1; saveCart(); toast("اتضاف للسلة ✅"); }
-function changeQty(id, d) { cart[id] += d; if (cart[id] <= 0) delete cart[id]; saveCart(); }
+function saveCart() {
+  localStorage.setItem("cart", JSON.stringify(cart)); renderCart();
+  if (coupon) applyCoupon(coupon.code, true); // نعيد حساب الخصم لو السلة اتغيرت
+}
+function addToCart(id) {
+  const p = PRODUCTS.find((x) => x.id == id);
+  if (!p || !inStock(p)) return;
+  if ((cart[id] || 0) + 1 > maxQty(p)) { toast(`المتاح ${maxQty(p)} بس`); return; }
+  cart[id] = (cart[id] || 0) + 1; saveCart(); toast("اتضاف للسلة ✅");
+}
+function changeQty(id, d) {
+  const p = PRODUCTS.find((x) => x.id == id);
+  if (d > 0 && p && cart[id] + d > maxQty(p)) { toast(`المتاح ${maxQty(p)} بس`); return; }
+  cart[id] += d; if (cart[id] <= 0) delete cart[id]; saveCart();
+}
+// نشيل من السلة أي منتج اتمسح/اتقفل ونظبط الكميات على المخزون
+function cleanCart() {
+  for (const id of Object.keys(cart)) {
+    const p = PRODUCTS.find((x) => x.id == id);
+    if (!p || !inStock(p)) delete cart[id];
+    else cart[id] = Math.min(cart[id], maxQty(p));
+  }
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
 
 function cartLines() {
-  return Object.keys(cart).map((id) => {
-    const p = PRODUCTS.find((x) => x.id == id);
-    return { id: p.id, name: p.name, price: p.price, qty: cart[id] };
-  });
+  return Object.keys(cart).map((id) => PRODUCTS.find((x) => x.id == id)).filter(Boolean)
+    .map((p) => ({ id: p.id, name: p.name, price: p.price, qty: cart[p.id] }));
 }
-function cartTotal() { return cartLines().reduce((s, l) => s + l.price * l.qty, 0); }
+function cartSubtotal() { return cartLines().reduce((s, l) => s + l.price * l.qty, 0); }
+// الكوبون المطبّق: { code, discount } والإجمالي بعد الخصم
+let coupon = null;
+function cartTotal() { return Math.max(0, cartSubtotal() - (coupon ? coupon.discount : 0)); }
+// نتحقق من الكوبون من السيرفر (الخصم بيتحسب هناك)
+async function applyCoupon(code, silent) {
+  code = (code || "").trim();
+  if (!code) { coupon = null; renderCart(); return; }
+  const r = await checkCoupon(code, cartSubtotal());
+  if (r.ok) { coupon = { code: code.toUpperCase(), discount: r.discount }; if (!silent) $("coupon-msg").innerHTML = `<div class="msg">✅ تم تطبيق الكوبون</div>`; }
+  else { coupon = null; $("coupon-msg").innerHTML = `<div class="err">${esc(r.message || "الكوبون غير صالح")}</div>`; }
+  renderCart();
+}
 
 function renderCart() {
   const lines = cartLines();
@@ -179,8 +223,12 @@ function renderCart() {
       <strong>${money(l.price * l.qty)}</strong>
     </div>`;
   }).join("") : "<p class='center muted'>🛒 السلة فاضية</p>";
+  $("sub-row").classList.toggle("hidden", !(coupon && lines.length));
+  $("sub-val").textContent = money(cartSubtotal());
+  $("discount-val").textContent = coupon ? `-${money(coupon.discount)} (${coupon.code})` : "";
   $("cart-total").textContent = money(cartTotal());
 }
+$("coupon-apply").onclick = () => applyCoupon($("coupon-input").value, false);
 
 // ---- فتح وقفل اللوحات الجانبية ----
 function showPanel(name) {
@@ -188,6 +236,7 @@ function showPanel(name) {
   $("cart-panel").classList.toggle("hidden", name !== "cart");
   $("account-panel").classList.toggle("hidden", name !== "account");
   $("backdrop").classList.toggle("hidden", !name);
+  if (name === "account") refreshAccount(); // نحدّث حالة الطلبات كل ما يفتح حسابه
 }
 function closeAll() { showPanel(null); }
 $("open-cart").onclick = () => showPanel("cart");
@@ -252,13 +301,21 @@ function prefillOrderForm() {
 }
 
 const STATUS_AR = { new: "جديد", shipped: "اتشحن", delivered: "اتسلّم", canceled: "ملغي" };
+const STEPS = ["new", "shipped", "delivered"];
+// شريط تتبع الطلب: جديد > اتشحن > اتسلّم (أو ملغي)
+function statusHTML(st) {
+  if (st === "canceled") return `<div class="track"><span class="st st-canceled">ملغي</span></div>`;
+  const at = Math.max(0, STEPS.indexOf(st));
+  return `<div class="track">${STEPS.map((s, i) => `<span class="step ${i <= at ? "on" : ""} ${i === at ? "now" : ""}">${STATUS_AR[s]}</span>`).join("")}</div>`;
+}
 async function renderMyOrders(token, userId) {
   const list = await loadMyOrders(token, userId);
   $("my-orders").innerHTML = list.length ? list.map((o) => `
     <div class="order-card">
       <div class="row"><span>${new Date(o.created_at).toLocaleDateString("ar-EG")}</span><strong>${money(o.total)}</strong></div>
       <small>${esc(o.items.map((i) => `${i.name} x${i.qty}`).join(" + "))}</small><br>
-      <small>الحالة: ${STATUS_AR[o.status] || esc(o.status)}</small>
+      ${Number(o.discount) > 0 ? `<br><small>خصم ${esc(o.coupon_code || "")}: -${money(o.discount)}</small>` : ""}
+      ${statusHTML(o.status)}
     </div>`).join("") : "<p class='muted'>لسه مفيش طلبات.</p>";
 }
 
@@ -311,7 +368,8 @@ $("order-form").onsubmit = async (e) => {
     address: f.get("address"),
     notes: f.get("notes") || "",
     items: cartLines(),
-    total: cartTotal(),
+    total: cartTotal(), // السيرفر بيحسبه تاني من أسعار الداتابيز والكوبون
+    coupon_code: coupon ? coupon.code : null,
   };
   $("submit-btn").disabled = true;
   try {
@@ -322,14 +380,26 @@ $("order-form").onsubmit = async (e) => {
     if (token) {
       try { await saveProfile(token, { id: order.user_id, full_name: order.customer_name, phone: order.phone, city: order.city, address: order.address }); } catch (_) {}
     }
-    cart = {}; saveCart(); e.target.reset();
+    cart = {}; coupon = null; $("coupon-input").value = ""; $("coupon-msg").innerHTML = ""; saveCart(); e.target.reset();
+    refreshProducts();
     $("result").innerHTML = '<div class="msg">✅ تم استلام طلبك! هنكلمك على الموبايل لتأكيد الشحن.</div>';
     if (token) await refreshAccount();
   } catch (err) {
     console.error(err);
-    $("result").innerHTML = '<div class="err">حصلت مشكلة، جرّب تاني.</div>';
+    $("result").innerHTML = `<div class="err">${esc(err.userMsg || "حصلت مشكلة، جرّب تاني.")}</div>`;
+    if (err.kind === "out_of_stock" || err.kind === "unavailable") await refreshProducts();
   }
   $("submit-btn").disabled = false;
 };
 
-renderContact(); renderCats(); renderDeals(); renderProducts(); renderCart(); refreshAccount();
+// المنتجات الحقيقية من Supabase (لو فشل بنستخدم products.js الاحتياطي)
+async function refreshProducts() {
+  if (!HAS_DB) return;
+  try { PRODUCTS = (await loadProducts()).map(mapProduct); } catch (e) { console.warn("products: using fallback", e); return; }
+  cleanCart(); renderCats(); renderDeals(); renderProducts(); renderCart();
+}
+(async () => {
+  renderContact();
+  if (HAS_DB) { try { PRODUCTS = (await loadProducts()).map(mapProduct); } catch (e) { console.warn("products: using fallback", e); } }
+  cleanCart(); renderCats(); renderDeals(); renderProducts(); renderCart(); refreshAccount();
+})();
