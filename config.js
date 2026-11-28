@@ -18,7 +18,7 @@ const CONFIG = {
   },
   // روابط السوشيال: حط رابط صفحتك الكامل. سيب أي رابط فاضي "" لو مش عايزه يظهر.
   SOCIAL: {
-    facebook: "https://www.facebook.com/",    // (مثال مؤقت)
+    facebook: "https://www.facebook.com/share/g/19b9jt4Bt9/",    // (مثال مؤقت)
     instagram: "https://www.instagram.com/",  // (مثال مؤقت)
     tiktok: "https://www.tiktok.com/",       // (مثال مؤقت)
     youtube: "",                                       // اختياري
