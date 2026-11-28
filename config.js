@@ -10,17 +10,17 @@ const CONFIG = {
   // EDIT HERE: change only the text between the quotes. Leave a value empty ("") to hide that item.
   // الأرقام: اكتب الموبايل عادي (01012345678). الواتساب بالكود الدولي من غير + (مصر: 201012345678).
   CONTACT: {
-    phone: "01000000000",          // رقم الموبايل (مثال مؤقت)
-    whatsapp: "201000000000",      // رقم الواتساب بالكود الدولي من غير + (مثال مؤقت)
+    phone: "01018602644",          // رقم الموبايل (مثال مؤقت)
+    whatsapp: "201018602644",      // رقم الواتساب بالكود الدولي من غير + (مثال مؤقت)
     email: "info@example.com",     // الإيميل (مثال مؤقت)
-    address: "القاهرة، مصر",        // العنوان
+    address: "مدينة شربين , المنصوره , مصر",        // العنوان
     hours: "يوميًا من 10 صباحًا إلى 10 مساءً", // مواعيد العمل
   },
   // روابط السوشيال: حط رابط صفحتك الكامل. سيب أي رابط فاضي "" لو مش عايزه يظهر.
   SOCIAL: {
-    facebook: "https://www.facebook.com/your-page",    // (مثال مؤقت)
-    instagram: "https://www.instagram.com/your-page",  // (مثال مؤقت)
-    tiktok: "https://www.tiktok.com/@your-page",       // (مثال مؤقت)
+    facebook: "https://www.facebook.com/",    // (مثال مؤقت)
+    instagram: "https://www.instagram.com/",  // (مثال مؤقت)
+    tiktok: "https://www.tiktok.com/",       // (مثال مؤقت)
     youtube: "",                                       // اختياري
   },
 };
